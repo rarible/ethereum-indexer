@@ -21,7 +21,8 @@ class ExtendedCollectionDtoConverter : Converter<ExtendedToken, NftCollectionDto
             features = token.features.map { CollectionFeatureDtoConverter.convert(it) },
             supportsLazyMint = token.features.contains(TokenFeature.MINT_AND_TRANSFER),
             minters = if (token.isRaribleContract) listOfNotNull(token.owner) else emptyList(),
-            meta = NftCollectionMetaDtoConverter.convert(meta)
+            meta = NftCollectionMetaDtoConverter.convert(meta),
+            isRaribleContract = token.isRaribleContract
         )
     }
 

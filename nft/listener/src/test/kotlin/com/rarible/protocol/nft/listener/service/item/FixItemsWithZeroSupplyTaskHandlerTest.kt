@@ -73,7 +73,8 @@ class FixItemsWithZeroSupplyTaskHandlerTest  : AbstractIntegrationTest(){
             tokenId = tokenId,
             supply = EthUInt256.of(0),
             royalties = listOf(Part.fullPart(AddressFactory.create())),
-            date = nowMillis()
+            date = nowMillis(),
+            isRaribleContract = false
         )
     }
 

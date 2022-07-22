@@ -84,7 +84,8 @@ class RoyaltyTaskHandlerTest : AbstractIntegrationTest() {
             lazySupply = EthUInt256.of(ThreadLocalRandom.current().nextLong(1, 10000)),
             royalties = (1..ThreadLocalRandom.current().nextInt(1, 20)).map { createPart() },
             owners = (1..ThreadLocalRandom.current().nextInt(1, 20)).map { AddressFactory.create() },
-            date = nowMillis()
+            date = nowMillis(),
+            isRaribleContract = false
         )
     }
 

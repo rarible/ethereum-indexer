@@ -31,7 +31,8 @@ data class Item(
     val mintedAt: Instant? = null,
     val deleted: Boolean = false,
     val lastLazyEventTimestamp: Long? = null,
-    override val revertableEvents: List<ItemEvent> = emptyList()
+    val isRaribleContract: Boolean,
+    override val revertableEvents: List<ItemEvent> = emptyList(),
 ) : Entity<ItemId, ItemEvent, Item> {
 
     @Transient
@@ -73,7 +74,8 @@ data class Item(
                 lazySupply = EthUInt256.ZERO,
                 royalties = emptyList(),
                 date = nowMillis(),
-                revertableEvents = emptyList()
+                revertableEvents = emptyList(),
+                isRaribleContract = false
             )
         }
     }

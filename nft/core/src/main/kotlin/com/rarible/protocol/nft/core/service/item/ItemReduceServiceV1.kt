@@ -133,24 +133,25 @@ class ItemReduceServiceV1(
                 }
             }
 
-    private fun reduceActions(initial: Pair<Item, Map<Address, Ownership>>): Mono<Pair<Item, Map<Address, Ownership>>> = mono {
-        val item = initial.first
+    private fun reduceActions(initial: Pair<Item, Map<Address, Ownership>>): Mono<Pair<Item, Map<Address, Ownership>>> =
+        mono {
+            val item = initial.first
 
-        nftItemActionEventRepository
-            .find(item.token, item.tokenId).collectList().awaitFirst()
-            .filter { action -> action.isActionable() }
-            .fold(initial) { acc, action ->
-                when (action) {
-                    is BurnItemAction -> {
-                        acc.first to acc.second.mapValues { (_, ownership) ->
-                            val value = ownership.value
-                            val updatedValue = if (value > EthUInt256.ZERO) value - EthUInt256.ONE else value
-                            ownership.copy(value = updatedValue)
+            nftItemActionEventRepository
+                .find(item.token, item.tokenId).collectList().awaitFirst()
+                .filter { action -> action.isActionable() }
+                .fold(initial) { acc, action ->
+                    when (action) {
+                        is BurnItemAction -> {
+                            acc.first to acc.second.mapValues { (_, ownership) ->
+                                val value = ownership.value
+                                val updatedValue = if (value > EthUInt256.ZERO) value - EthUInt256.ONE else value
+                                ownership.copy(value = updatedValue)
+                            }
                         }
                     }
                 }
-            }
-    }
+        }
 
     private fun royalty(pair: Pair<Item, Map<Address, Ownership>>): Mono<Pair<Item, Map<Address, Ownership>>> = mono {
         val item = pair.first
@@ -238,10 +239,15 @@ class ItemReduceServiceV1(
                         item
                     }
                     is ItemLazyMint -> {
-                        item.copy(royalties = event.royalties, creators = event.creators, creatorsFinal = true)
+                        item.copy(
+                            royalties = event.royalties,
+                            creators = event.creators,
+                            creatorsFinal = true,
+                            isRaribleContract = true
+                        )
                     }
                     is ItemCreators -> {
-                        item.copy(creators = event.creators, creatorsFinal = true)
+                        item.copy(creators = event.creators, creatorsFinal = true, isRaribleContract = true)
                     }
                     is BurnItemLazyMint -> {
                         logger.info("Ignoring BurnItemLazyMint event: $event")
@@ -281,7 +287,10 @@ class ItemReduceServiceV1(
         }
     }
 
-    private fun ownershipsReducer(map: MutableMap<Address, Ownership>, log: HistoryLog): MutableMap<Address, Ownership> {
+    private fun ownershipsReducer(
+        map: MutableMap<Address, Ownership>,
+        log: HistoryLog
+    ): MutableMap<Address, Ownership> {
         val (event, _) = log
         return when (event) {
             is ItemTransfer -> {
@@ -381,7 +390,12 @@ class ItemReduceServiceV1(
 
         val logger: Logger = LoggerFactory.getLogger(ItemReduceService::class.java)
 
-        private fun <T, A1, A2> Flux<T>.reduce(a1: A1, a2: A2, reducer1: (A1, T) -> A1, reducer2: (A2, T) -> A2): Mono<Pair<A1, A2>> =
+        private fun <T, A1, A2> Flux<T>.reduce(
+            a1: A1,
+            a2: A2,
+            reducer1: (A1, T) -> A1,
+            reducer2: (A2, T) -> A2
+        ): Mono<Pair<A1, A2>> =
             reduce(Pair(a1, a2)) { (ac1, ac2), t ->
                 Pair(reducer1(ac1, t), reducer2(ac2, t))
             }

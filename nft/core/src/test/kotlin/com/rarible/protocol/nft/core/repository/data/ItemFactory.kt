@@ -19,6 +19,7 @@ fun createItem(): Item {
         lazySupply = EthUInt256.of(BigInteger.valueOf(ThreadLocalRandom.current().nextLong(1, 10000))),
         royalties = (1..ThreadLocalRandom.current().nextInt(1, 20)).map { createRoyalty() },
         owners = (1..ThreadLocalRandom.current().nextInt(1, 20)).map { createAddress() },
-        date = nowMillis()
+        date = nowMillis(),
+        isRaribleContract = false
     )
 }
